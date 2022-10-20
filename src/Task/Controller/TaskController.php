@@ -14,14 +14,11 @@ use App\Task\Infrastructure\TaskRepository;
 
 class TaskController
 {
-    private $gateway;
     private $userId;
     private $taskId;
 
-    public function __construct(/*private*/ TaskRepository $gateway,
-                                /*private*/ int $userId)
+    public function __construct(/*private*/ int $userId)
     {
-        $this->gateway = $gateway;
         $this->userId = $userId;
     }
 
@@ -143,8 +140,8 @@ class TaskController
             return;
         }
         
-        $rows = $this->gateway->updateByUserId($this->userId, $id, $data);
-        echo json_encode(["message" => "Task updated", "rows" => $rows]);
+        // $rows = $this->gateway->updateByUserId($this->userId, $id, $data);
+        // echo json_encode(["message" => "Task updated", "rows" => $rows]);
     }
 
     public function deleteByUserId(int $id)
@@ -181,7 +178,7 @@ class TaskController
         http_response_code(404);
         echo json_encode(["message" => "Task with ID $id not found"]);
     }
-
+<
     private function respondCreated(string $id): void
     {
         http_response_code(201);

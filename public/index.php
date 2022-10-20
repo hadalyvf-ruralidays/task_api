@@ -45,7 +45,5 @@ if (!$auth->authenticateJwtToken()) {
 // Process request
 $userId = $auth->getUserId();
 
-$taskGateway = new TaskRepository();
-$controller = new TaskController($taskGateway, $userId);
-
+$controller = new TaskController($userId);
 $controller->processRequest($method, $id);
