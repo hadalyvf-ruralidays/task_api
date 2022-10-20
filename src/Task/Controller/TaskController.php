@@ -4,12 +4,19 @@ namespace App\Task\Controller;
 
 use App\Task\Application\AddTaskDTO;
 use App\Task\Application\AddTaskService;
+use App\Task\Application\DeleteTaskDTO;
+use App\Task\Application\DeleteTaskService;
+use App\Task\Application\GetAllTasksDTO;
+use App\Task\Application\GetAllTasksService;
+use App\Task\Application\GetTaskDTO;
+use App\Task\Application\GetTaskService;
 use App\Task\Infrastructure\TaskRepository;
 
 class TaskController
 {
     private $gateway;
     private $userId;
+    private $taskId;
 
     public function __construct(/*private*/ TaskRepository $gateway,
                                 /*private*/ int $userId)
@@ -18,9 +25,74 @@ class TaskController
         $this->userId = $userId;
     }
 
+    public function processRequest(string $method, ?string $taskId): void
+    {
+        $this->taskId = $taskId;
+
+        if ($this->taskId === null) {
+            if ($method == "GET") {
+
+                $this->getAllByUserId();
+
+            } elseif ($method == "POST") {
+
+                $this->addByUserId();
+                
+            } else {
+
+                $this->respondMethodNotAllowed("GET, POST");
+            }
+        } else {
+
+            $task = $this->getByUserId();
+
+            if ($task === false) {
+
+                $this->respondNotFound($this->taskId);
+                return;
+            }
+
+            switch ($method) {
+                case "GET":
+                    echo json_encode($task);
+                    break;
+
+                case "PATCH":
+                    $this->updateByUserId($this->taskId);
+                    break;
+
+                case "DELETE":
+                    $this->deleteByUserId($this->taskId);
+                    break;
+
+                default:
+                    $this->respondMethodNotAllowed("GET, PATCH, DELETE");
+            }
+        }
+    }
+    
     public function getAllByUserId()
     {
-        echo json_encode($this->gateway->getAllByUserId($this->userId));
+        $taskRepository = new TaskRepository();
+
+        $getAllTasksDTO = new GetAllTasksDTO($this->userId);
+
+        $getAllTasksService = new GetAllTasksService($taskRepository);
+        $serviceResponse = $getAllTasksService->execute($getAllTasksDTO);
+
+        echo json_encode($serviceResponse);
+    }
+
+    public function getByUserId()
+    {
+        $taskRepository = new TaskRepository();
+
+        $getTaskDTO = new GetTaskDTO($this->userId, $this->taskId);
+
+        $getTaskService = new GetTaskService($taskRepository);
+        $serviceResponse = $getTaskService->execute($getTaskDTO);
+
+        echo json_encode($serviceResponse);
     }
 
     public function addByUserId()
@@ -45,18 +117,18 @@ class TaskController
         $serviceResponse = $addTaskService->execute($addTaskRequest);
 
         print_r($serviceResponse);
-        exit;
 
-        $errors = $this->getValidationErrors($data);
+        // $errors = $this->getValidationErrors($data);
 
-        if (!empty($errors)) {
-            $this->respondUnprocessableEntity($errors);
-            return;
-        }
+        // if (!empty($errors)) {
+        //     $this->respondUnprocessableEntity($errors);
+        //     return;
+        // }
 
-        $id = $this->gateway->createByUserId($this->userId, $data);
+        // $id = $this->gateway->createByUserId($this->userId, $data);
+        
 
-        $this->respondCreated($id);
+        // $this->respondCreated($id);
     }
 
     public function updateByUserId(int $id)
@@ -77,53 +149,20 @@ class TaskController
 
     public function deleteByUserId(int $id)
     {
-        $rows = $this->gateway->deleteByUserId($this->userId, $id);
-        echo json_encode(["message" => "Task deleted", "rows" => $rows]);
+        $taskRepository = new TaskRepository();
+
+        $deleteTaskDTO = new DeleteTaskDTO($this->userId, $this->taskId);
+
+        $deleteTaskService = new DeleteTaskService($taskRepository);
+        $serviceResponse = $deleteTaskService->execute($deleteTaskDTO);
+
+        echo json_encode($serviceResponse);
+
+        // $rows = $this->gateway->deleteByUserId($this->userId, $id);
+        // echo json_encode(["message" => "Task deleted", "rows" => $rows]);
     }
 
-    public function processRequest(string $method, ?string $id): void
-    {
-        if ($id === null) {
-            if ($method == "GET") {
 
-                $this->getAllByUserId();
-
-            } elseif ($method == "POST") {
-
-                $this->addByUserId();
-                
-            } else {
-
-                $this->respondMethodNotAllowed("GET, POST");
-            }
-        } else {
-
-            $task = $this->gateway->getByUserId($this->userId, $id);
-
-            if ($task === false) {
-
-                $this->respondNotFound($id);
-                return;
-            }
-
-            switch ($method) {
-                case "GET":
-                    echo json_encode($task);
-                    break;
-
-                case "PATCH":
-                    $this->updateByUserId($id);
-                    break;
-
-                case "DELETE":
-                    $this->deleteByUserId($id);
-                    break;
-
-                default:
-                    $this->respondMethodNotAllowed("GET, PATCH, DELETE");
-            }
-        }
-    }
 
     private function respondUnprocessableEntity(array $errors): void
     {

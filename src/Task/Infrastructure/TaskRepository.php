@@ -31,7 +31,31 @@ class TaskRepository implements TaskRepositoryInterface
         $stmt->execute();
     }
 
-    public function createByUserId(int $userId, array $data): string
+    public function getAll(int $userId): ?array
+    {
+        $sql = "SELECT *
+        FROM task
+        WHERE user_id = :userId";
+
+        $stmt = $this->connection->prepare($sql);
+
+        $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        $data = [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            
+            $row['is_completed'] = (bool) $row['is_completed'];
+            $data[] = $row;
+        }
+
+        return $data;
+    }
+
+
+    public function createByUserId(int $userId, array $data): string //seria el save
     {
         $sql = "INSERT INTO task (name, priority, is_completed, user_id)
                 VALUES (:name, :priority, :is_completed, :userId)";
@@ -58,39 +82,18 @@ class TaskRepository implements TaskRepositoryInterface
         return $this->connection->lastInsertId();
     }
 
-    public function getAllByUserId(int $userId): array
+
+
+    public function getByUserId(int $userId, string $taskId) /*: array| false*/
     {
         $sql = "SELECT *
                 FROM task
-                WHERE user_id = :userId";
-
-        $stmt = $this->connection->prepare($sql);
-
-        $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        $data = [];
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            
-            $row['is_completed'] = (bool) $row['is_completed'];
-            $data[] = $row;
-        }
-
-        return $data;
-    }
-
-    public function getByUserId(int $userId, string $id)//: array | false
-    {
-        $sql = "SELECT *
-                FROM task
-                WHERE id = :id
+                WHERE id = :taskId
                 AND user_id = :userId";
         
         $stmt = $this->connection->prepare($sql);
 
-        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        $stmt->bindValue(":taskId", $taskId, PDO::PARAM_INT);
         $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
 
         $stmt->execute();
@@ -163,15 +166,15 @@ class TaskRepository implements TaskRepositoryInterface
         }
     }
 
-    public function deleteByUserId(int $userId, string $id): int
+    public function deleteByUserId(int $userId, string $taskId): int
     {
         $sql = "DELETE FROM task
-                WHERE id = :id
+                WHERE id = :taskId
                 AND user_id = :userId";
         
         $stmt = $this->connection->prepare($sql);
 
-        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        $stmt->bindValue(":taskId", $taskId, PDO::PARAM_INT);
         $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
 
         $stmt->execute();
