@@ -1,0 +1,4 @@
+.env
+notas
+vendor/
+*.html
