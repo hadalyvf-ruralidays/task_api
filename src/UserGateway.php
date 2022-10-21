@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Shared\Infrastructure\Database\Database;
 use PDO;
 
 class UserGateway

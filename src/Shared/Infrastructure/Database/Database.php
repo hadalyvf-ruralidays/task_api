@@ -1,5 +1,6 @@
 <?php
-namespace App;
+
+namespace App\Shared\Infrastructure\Database;
 
 use PDO;
 use PDOException;

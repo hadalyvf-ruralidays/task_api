@@ -27,11 +27,7 @@ class TaskController
         $this->taskId = $taskId;
 
         if ($this->taskId === null) {
-            if ($method == "GET") {
-
-                $this->getAllByUserId();
-
-            } elseif ($method == "POST") {
+            if ($method == "POST") {
 
                 $this->addByUserId();
                 
@@ -41,7 +37,7 @@ class TaskController
             }
         } else {
 
-            $task = $this->getByUserId();
+            $task = $this->getByUserId(5);
 
             if ($task === false) {
 
@@ -80,11 +76,11 @@ class TaskController
         echo json_encode($serviceResponse);
     }
 
-    public function getByUserId()
+    public function getByUserId(int $taskId)
     {
         $taskRepository = new TaskRepository();
 
-        $getTaskDTO = new GetTaskDTO($this->userId, $this->taskId);
+        $getTaskDTO = new GetTaskDTO($this->userId, $taskId);
 
         $getTaskService = new GetTaskService($taskRepository);
         $serviceResponse = $getTaskService->execute($getTaskDTO);
@@ -144,19 +140,18 @@ class TaskController
         // echo json_encode(["message" => "Task updated", "rows" => $rows]);
     }
 
-    public function deleteByUserId(int $id)
-    {
+    public function deleteByUserId(int $taskId)
+    { 
         $taskRepository = new TaskRepository();
 
-        $deleteTaskDTO = new DeleteTaskDTO($this->userId, $this->taskId);
+        $deleteTaskDTO = new DeleteTaskDTO($this->userId, $taskId);
 
         $deleteTaskService = new DeleteTaskService($taskRepository);
         $serviceResponse = $deleteTaskService->execute($deleteTaskDTO);
 
         echo json_encode($serviceResponse);
 
-        // $rows = $this->gateway->deleteByUserId($this->userId, $id);
-        // echo json_encode(["message" => "Task deleted", "rows" => $rows]);
+        echo json_encode(["message" => "Task deleted"]);
     }
 
 
@@ -178,7 +173,7 @@ class TaskController
         http_response_code(404);
         echo json_encode(["message" => "Task with ID $id not found"]);
     }
-<
+
     private function respondCreated(string $id): void
     {
         http_response_code(201);

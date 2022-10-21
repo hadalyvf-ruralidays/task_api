@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Database;
+use App\Shared\Infrastructure\Database\Database;
 use PDO;
 
 class RefreshTokenGateway

@@ -2,7 +2,7 @@
 
 namespace App\Task\Infrastructure;
 
-use App\Database;
+use App\Shared\Infrastructure\Database\Database;
 use App\Task\Domain\Task;
 use App\Task\Domain\TaskRepositoryInterface;
 use PDO;
