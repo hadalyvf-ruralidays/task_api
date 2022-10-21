@@ -2,8 +2,8 @@
 
 require dirname(__DIR__) . "/vendor/autoload.php";
 
-set_error_handler("App\\ErrorHandler::handleError");
-set_exception_handler("App\\ErrorHandler::handleException"); 
+set_error_handler("App\\Shared\\Domain\\ErrorHandler::handleError");
+set_exception_handler("App\\Shared\\Domain\\ErrorHandler::handleException"); 
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();

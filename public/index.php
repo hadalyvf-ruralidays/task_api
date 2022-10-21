@@ -5,37 +5,25 @@ declare(strict_types=1);
 use App\Authentication;
 use App\JWTCodec;
 use App\Task\Controller\TaskController;
+use App\User\Controller\UserController;
+
 use App\Task\Infrastructure\TaskRepository;
 use App\UserGateway;
 
 require dirname(__DIR__) . "/src/bootstrap.php";
 
-// User authentication 
-$userGateway = new UserGateway();
-$codec = new JWTCodec();
-$auth = new Authentication($userGateway, $codec);
-
-// if (!$auth->authenticateAccessToken()) {
-//     exit;
-// }
-
-// if (!$auth->authenticateAPIKey()) {
-//     exit;
-// }
-
-if (!$auth->authenticateJwtToken()) {
-    exit;
-}
-
-// Process request
-$userId = $auth->getUserId();
-
+// Routing
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/my_api/public/tasks', 'TaskController::getAllByUserId');
     $r->addRoute('GET', '/my_api/public/tasks/{id}', 'TaskController::getByUserId');
     $r->addRoute('POST', '/my_api/public/tasks', 'TaskController::addByUserId');
     $r->addRoute('PATCH', '/my_api/public/tasks/{id}', 'TaskController::updateByUserId');
     $r->addRoute('DELETE', '/my_api/public/tasks/{id}', 'TaskController::deleteByUserId');
+
+    $r->addRoute('POST', '/my_api/public/user/register', 'UserController::register');
+    $r->addRoute('POST', '/my_api/public/user/login', 'UserController::login');
+
+
 });
 
 $httpMethod = $_SERVER['REQUEST_METHOD'];
@@ -59,7 +47,6 @@ switch ($routeInfo[0]) {
         echo 'not found';
         break;
     case \FastRoute\Dispatcher::FOUND:
-        //echo "found";
         $controllerMethod = explode("::",  $routeInfo[1]);
         $controller = $controllerMethod[0];
         $method = $controllerMethod[1];
@@ -68,7 +55,7 @@ switch ($routeInfo[0]) {
         if ($controller == "TaskController") {
             $controllerToLoad = new TaskController($userId);
         } elseif ($controller == "UserController") {
-            // $controllerToLoad = new UserController($userId);
+            $controllerToLoad = new UserController();
         }
      
         if (array_key_exists('id', $vars)) {
@@ -79,3 +66,26 @@ switch ($routeInfo[0]) {
 
         break;
 }
+
+exit;
+
+
+// User authentication 
+$userGateway = new UserGateway();
+$codec = new JWTCodec();
+$auth = new Authentication($userGateway, $codec);
+
+// if (!$auth->authenticateAccessToken()) {
+//     exit;
+// }
+
+// if (!$auth->authenticateAPIKey()) {
+//     exit;
+// }
+
+if (!$auth->authenticateJwtToken()) {
+    exit;
+}
+
+// Process request
+$userId = $auth->getUserId();

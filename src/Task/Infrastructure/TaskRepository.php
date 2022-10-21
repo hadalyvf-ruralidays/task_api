@@ -54,7 +54,6 @@ class TaskRepository implements TaskRepositoryInterface
         return $data;
     }
 
-
     public function createByUserId(int $userId, array $data): string //seria el save
     {
         $sql = "INSERT INTO task (name, priority, is_completed, user_id)
