@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\JWTCodec;
 use App\RefreshTokenGateway;
+use App\User\Infrastructure\UserRepository;
 use App\UserGateway;
 
 require __DIR__ . "/bootstrap.php";
@@ -44,8 +45,8 @@ if ($refreshToken === false) {
     exit;
 }
 
-$userGateway = new UserGateway();
-$user = $userGateway->getByID($userId);
+$userRepository = new UserRepository();
+$user = $userRepository->getByID($userId);
 
 if ($user === false) {
     http_response_code(401);

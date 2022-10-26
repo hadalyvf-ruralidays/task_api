@@ -71,9 +71,8 @@ exit;
 
 
 // User authentication 
-$userGateway = new UserGateway();
-$codec = new JWTCodec();
-$auth = new Authentication($userGateway, $codec);
+$codec = new JWTCodec();12
+$auth = new Authentication($codec);
 
 // if (!$auth->authenticateAccessToken()) {
 //     exit;
