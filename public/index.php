@@ -8,9 +8,8 @@ use App\Task\Controller\TaskController;
 use App\User\Controller\UserController;
 
 use App\Task\Infrastructure\TaskRepository;
-use App\UserGateway;
-
 require dirname(__DIR__) . "/src/bootstrap.php";
+
 
 // Routing
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
@@ -22,9 +21,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 
     $r->addRoute('POST', '/my_api/public/user/register', 'UserController::register');
     $r->addRoute('POST', '/my_api/public/user/login', 'UserController::login');
-
-
 });
+
 
 $httpMethod = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
@@ -33,9 +31,30 @@ if (false !== $pos = strpos($uri, '?')) {
     $uri = substr($uri, 0, $pos);
 }
 
-$uri = rawurldecode($uri);  // /my_api/public/tasks
-
+$uri = rawurldecode($uri);
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+
+$controllerMethod = explode("::",  $routeInfo[1]);
+$controller = $controllerMethod[0];
+$method = $controllerMethod[1];
+$vars = $routeInfo[2];
+
+
+// Login / register
+if ($method === "login" || $method === "register") {
+    $userController = new UserController();
+    $userController->$method();
+}
+
+
+// Process / request with authentication
+$auth = new Authentication();
+if (!$auth->authenticateJwtToken()) {
+    exit;
+}
+
+// Process request
+$userId = $auth->getUserId();
 
 switch ($routeInfo[0]) {
     case \FastRoute\Dispatcher::NOT_FOUND:
@@ -47,11 +66,7 @@ switch ($routeInfo[0]) {
         echo 'not found';
         break;
     case \FastRoute\Dispatcher::FOUND:
-        $controllerMethod = explode("::",  $routeInfo[1]);
-        $controller = $controllerMethod[0];
-        $method = $controllerMethod[1];
-        $vars = $routeInfo[2];
-
+        
         if ($controller == "TaskController") {
             $controllerToLoad = new TaskController($userId);
         } elseif ($controller == "UserController") {
@@ -68,23 +83,3 @@ switch ($routeInfo[0]) {
 }
 
 exit;
-
-
-// User authentication 
-$codec = new JWTCodec();12
-$auth = new Authentication($codec);
-
-// if (!$auth->authenticateAccessToken()) {
-//     exit;
-// }
-
-// if (!$auth->authenticateAPIKey()) {
-//     exit;
-// }
-
-if (!$auth->authenticateJwtToken()) {
-    exit;
-}
-
-// Process request
-$userId = $auth->getUserId();

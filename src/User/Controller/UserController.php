@@ -65,7 +65,7 @@ class UserController
         $serviceResponse = $loginService->execute($loginRequest);
 
         echo "logeado";
-
+        exit;
         //generar token
         $codec = new JWTCodec();
 

@@ -20,11 +20,10 @@ class Authentication
 
     private int $userId;
 
-    public function __construct(/*private*/ 
-                                            JWTCodec $codec)
+    public function __construct()
     {
         $this->userRepository = new UserRepository;
-        $this->codec = $codec;
+        $this->codec = new JWTCodec;
     }
     
     public function authenticateAPIKey(): bool
