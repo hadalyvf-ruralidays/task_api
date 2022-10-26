@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\JWTCodec;
 use App\RefreshTokenGateway;
 use App\User\Infrastructure\UserRepository;
-use App\UserGateway;
 
 require __DIR__ . "/bootstrap.php";
 
@@ -22,6 +21,7 @@ if (!array_key_exists("token", $data)) {
         echo json_encode(["message" => "missing token"]);
         exit;
 }
+
 
 $codec = new JWTCodec();
 
@@ -54,7 +54,28 @@ if ($user === false) {
     exit;
 }
 
-require __DIR__ . "/tokens.php";
+$payload = [
+    "sub" => $user["id"],
+    "name" => $user["username"],
+    "exp" => time() + 300
+]; 
+
+// $accessToken = base64_encode(json_encode($payload));
+
+// JWT token
+$accessToken = $codec->encode($payload);
+
+// JWT refresh token
+$refreshTokenExpiry = time() + 432000;
+$refreshToken = $codec->encode([
+    "sub" => $user["id"],
+    "exp" => $refreshTokenExpiry
+]);
+
+echo json_encode([
+    "access_token" => $accessToken,
+    "refresh_token" => $refreshToken
+]);
 
 $refreshTokenGateway->delete($data["token"]);
 $refreshTokenGateway->create($refreshToken, $refreshTokenExpiry);

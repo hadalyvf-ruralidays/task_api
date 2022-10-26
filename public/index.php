@@ -18,7 +18,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/my_api/public/tasks', 'TaskController::addByUserId');
     $r->addRoute('PATCH', '/my_api/public/tasks/{id}', 'TaskController::updateByUserId');
     $r->addRoute('DELETE', '/my_api/public/tasks/{id}', 'TaskController::deleteByUserId');
-
+    
+    $r->addRoute('POST', '/my_api/public/user/logout', 'UserController::logout');
     $r->addRoute('POST', '/my_api/public/user/register', 'UserController::register');
     $r->addRoute('POST', '/my_api/public/user/login', 'UserController::login');
 });
@@ -39,23 +40,7 @@ $controller = $controllerMethod[0];
 $method = $controllerMethod[1];
 $vars = $routeInfo[2];
 
-
-// Login / register
-if ($method === "login" || $method === "register") {
-    $userController = new UserController();
-    $userController->$method();
-}
-
-
-// Process / request with authentication
-$auth = new Authentication();
-if (!$auth->authenticateJwtToken()) {
-    exit;
-}
-
 // Process request
-$userId = $auth->getUserId();
-
 switch ($routeInfo[0]) {
     case \FastRoute\Dispatcher::NOT_FOUND:
         // ... 404 Not Found
@@ -68,6 +53,13 @@ switch ($routeInfo[0]) {
     case \FastRoute\Dispatcher::FOUND:
         
         if ($controller == "TaskController") {
+            // Process / request with authentication
+            $auth = new Authentication();
+            if (!$auth->authenticateJwtToken()) {
+                exit;
+            }
+            $userId = $auth->getUserId();
+
             $controllerToLoad = new TaskController($userId);
         } elseif ($controller == "UserController") {
             $controllerToLoad = new UserController();
