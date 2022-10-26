@@ -21,48 +21,6 @@ class TaskController
     {
         $this->userId = $userId;
     }
-
-    public function processRequest(string $method, ?string $taskId): void
-    {
-        $this->taskId = $taskId;
-
-        if ($this->taskId === null) {
-            if ($method == "POST") {
-
-                $this->addByUserId();
-                
-            } else {
-
-                $this->respondMethodNotAllowed("GET, POST");
-            }
-        } else {
-
-            $task = $this->getByUserId(5);
-
-            if ($task === false) {
-
-                $this->respondNotFound($this->taskId);
-                return;
-            }
-
-            switch ($method) {
-                case "GET":
-                    echo json_encode($task);
-                    break;
-
-                case "PATCH":
-                    $this->updateByUserId($this->taskId);
-                    break;
-
-                case "DELETE":
-                    $this->deleteByUserId($this->taskId);
-                    break;
-
-                default:
-                    $this->respondMethodNotAllowed("GET, PATCH, DELETE");
-            }
-        }
-    }
     
     public function getAllByUserId()
     {
@@ -91,6 +49,8 @@ class TaskController
     public function addByUserId()
     {
         $taskRepository = new TaskRepository();
+
+        //is user authenticate?
 
         $data = (array) json_decode(file_get_contents("php://input"), true); 
 
