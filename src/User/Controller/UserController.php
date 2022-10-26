@@ -122,6 +122,8 @@ class UserController
         }
     }
 
+    
+    // TOKENS
     public function generateToken(array $user) 
     {
         $codec = new JWTCodec();
@@ -152,6 +154,11 @@ class UserController
         // Persist refreshToken
         $refreshTokenGateway = new RefreshTokenGateway();
         $refreshTokenGateway->create($refreshToken, $refreshTokenExpiry);
+    }
+
+    public function deleteExpiredRefreshTokens() {
+        $refreshTokenGateway = new RefreshTokenGateway();
+        echo $refreshTokenGateway->deleteExpired(), "\n";
     }
 
 }
