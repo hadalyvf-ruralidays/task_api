@@ -7,7 +7,7 @@ use Exception;
 
 class LoginService
 {
-    protected $userRepositoryInterface;
+    protected UserRepositoryInterface $userRepositoryInterface;
 
     public function __construct(UserRepositoryInterface $userRepositoryInterface)
     {
@@ -16,7 +16,6 @@ class LoginService
 
     public function execute(LoginDTO $loginDTO)
     {
-
         $username = $loginDTO->getUsername();
         $password = $loginDTO->getPassword();
 

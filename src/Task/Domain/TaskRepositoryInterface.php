@@ -11,5 +11,4 @@ interface TaskRepositoryInterface
     public function getByUserId(int $userId, string $taskId);
 
     public function deleteByUserId(int $userId, string $taskId): int;
-
 }

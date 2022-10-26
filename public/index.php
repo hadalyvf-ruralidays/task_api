@@ -2,14 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Authentication;
-use App\JWTCodec;
 use App\Task\Controller\TaskController;
 use App\User\Controller\UserController;
 
-use App\Task\Infrastructure\TaskRepository;
 require dirname(__DIR__) . "/src/bootstrap.php";
-
 
 // Routing
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
@@ -23,7 +19,6 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/my_api/public/user/register', 'UserController::register');
     $r->addRoute('POST', '/my_api/public/user/login', 'UserController::login');
 });
-
 
 $httpMethod = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
@@ -42,25 +37,20 @@ $vars = $routeInfo[2];
 
 // Process request
 switch ($routeInfo[0]) {
+
     case \FastRoute\Dispatcher::NOT_FOUND:
         // ... 404 Not Found
         echo 'not found';
         break;
+
     case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
         // ... 405 Method Not Allowed
         echo 'not found';
         break;
-    case \FastRoute\Dispatcher::FOUND:
-        
-        if ($controller == "TaskController") {
-            // Process / request with authentication
-            $auth = new Authentication();
-            if (!$auth->authenticateJwtToken()) {
-                exit;
-            }
-            $userId = $auth->getUserId();
 
-            $controllerToLoad = new TaskController($userId);
+    case \FastRoute\Dispatcher::FOUND:
+        if ($controller == "TaskController") {
+            $controllerToLoad = new TaskController();
         } elseif ($controller == "UserController") {
             $controllerToLoad = new UserController();
         }
@@ -70,8 +60,5 @@ switch ($routeInfo[0]) {
         } else {
             $controllerToLoad->$method(); 
         }
-
         break;
 }
-
-exit;

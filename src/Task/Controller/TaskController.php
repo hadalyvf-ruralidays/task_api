@@ -2,6 +2,7 @@
 
 namespace App\Task\Controller;
 
+use App\Authentication;
 use App\Task\Application\AddTaskDTO;
 use App\Task\Application\AddTaskService;
 use App\Task\Application\DeleteTaskDTO;
@@ -15,13 +16,18 @@ use App\Task\Infrastructure\TaskRepository;
 class TaskController
 {
     private $userId;
-    private $taskId;
 
-    public function __construct(/*private*/ int $userId)
+    public function __construct()
     {
-        $this->userId = $userId;
+        $authentication = new Authentication();
+
+        if (!$authentication->authenticateJwtToken()) {
+            exit;
+        }
+
+        $this->userId = $authentication->getUserId();
     }
-    
+
     public function getAllByUserId()
     {
         $taskRepository = new TaskRepository();
@@ -50,8 +56,6 @@ class TaskController
     {
         $taskRepository = new TaskRepository();
 
-        //is user authenticate?
-
         $data = (array) json_decode(file_get_contents("php://input"), true); 
 
         $addTaskParams = [];
@@ -68,8 +72,6 @@ class TaskController
 
         $addTaskService = new AddTaskService($taskRepository);
         $serviceResponse = $addTaskService->execute($addTaskRequest);
-
-        print_r($serviceResponse);
 
         // $errors = $this->getValidationErrors($data);
 

@@ -13,9 +13,6 @@ use Exception;
 
 class UserController
 {
-    private $userId;
-    private $taskId;
-
     public function __construct()
     {
     }
