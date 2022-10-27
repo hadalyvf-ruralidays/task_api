@@ -1,5 +1,4 @@
 <?php
-//cap. 60. el login no es restful, se puede convertir pasandole las cosas en el front (ver video)
 declare(strict_types=1);
 
 use App\JWTCodec;

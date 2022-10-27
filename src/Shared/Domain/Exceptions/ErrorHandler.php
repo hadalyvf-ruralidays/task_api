@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Shared\Domain;
+namespace App\Shared\Domain\Exceptions;
 
 use ErrorException;
 use Throwable;
@@ -19,8 +19,8 @@ class ErrorHandler
 
     public static function handleException(Throwable $exception): void
     {
-        http_response_code(500);
-
+        http_response_code(400);
+        
         echo json_encode([
                 "code" => $exception->getCode(),
                 "message" => $exception->getMessage(),

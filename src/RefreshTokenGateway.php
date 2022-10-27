@@ -14,7 +14,6 @@ class RefreshTokenGateway
     {
         $this->connection = (new Database())->getConnection();
         $this->key = $_ENV["SECRET_KEY"];
-
     }
 
     public function create(string $token, int $expiry): bool

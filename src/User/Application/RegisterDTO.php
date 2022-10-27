@@ -2,6 +2,9 @@
 
 namespace App\User\Application;
 
+use App\Shared\Domain\Exceptions\EmptyFieldException;
+use Exception;
+
 class RegisterDTO 
 {
     private string $name;
@@ -17,7 +20,26 @@ class RegisterDTO
         string $password,
         string $apiKey
     )
-    {
+    {   
+        if (empty($name)) {
+            throw new EmptyFieldException('name');
+        }
+
+        if (empty($username)) {
+            throw new EmptyFieldException('username');
+        }
+        if (empty($email)) {
+            throw new EmptyFieldException('email');
+        }
+
+        if (empty($password)) {
+            throw new EmptyFieldException('password');
+        }
+
+        if (empty($apiKey)) {
+            throw new EmptyFieldException('apiKey');
+        }
+        
         $this->name = $name;
         $this->username = $username;
         $this->email = $email;
