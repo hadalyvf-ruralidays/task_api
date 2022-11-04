@@ -16,7 +16,8 @@ use Exception;
 
 class TaskController
 {
-    private $userId;
+    private int $userId;
+    private TaskRepository $taskRepository;
 
     public function __construct()
     {
@@ -27,16 +28,16 @@ class TaskController
         }
 
         $this->userId = $authentication->getUserId();
+        $this->taskRepository = new TaskRepository();
     }
 
     public function getAllByUserId()
     {
-        $taskRepository = new TaskRepository();
 
         try {
             $getAllTasksDTO = new GetAllTasksDTO($this->userId);
 
-            $getAllTasksService = new GetAllTasksService($taskRepository);
+            $getAllTasksService = new GetAllTasksService($this->taskRepository);
             $serviceResponse = $getAllTasksService->execute($getAllTasksDTO);
     
             echo json_encode($serviceResponse);
@@ -49,11 +50,10 @@ class TaskController
     public function getByUserId(int $taskId)
     {
         try {
-            $taskRepository = new TaskRepository();
 
             $getTaskDTO = new GetTaskDTO($this->userId, $taskId);
 
-            $getTaskService = new GetTaskService($taskRepository);
+            $getTaskService = new GetTaskService($this->taskRepository);
             $serviceResponse = $getTaskService->execute($getTaskDTO);
 
             echo json_encode($serviceResponse);
@@ -65,7 +65,6 @@ class TaskController
 
     public function addByUserId()
     {
-        $taskRepository = new TaskRepository();
 
         try {
             $data = (array) json_decode(file_get_contents("php://input"), true); 
@@ -82,7 +81,7 @@ class TaskController
                 $this->userId
             );
     
-            $addTaskService = new AddTaskService($taskRepository);
+            $addTaskService = new AddTaskService($this->taskRepository);
             $serviceResponse = $addTaskService->execute($addTaskRequest);
         } catch (Exception $e) {
             http_response_code($e->getCode());
@@ -105,7 +104,6 @@ class TaskController
 
     public function updateByUserId(int $id)
     {
-
         try {
             $data = (array) json_decode(file_get_contents("php://input"), true); 
     
@@ -128,11 +126,9 @@ class TaskController
     public function deleteByUserId(int $taskId)
     { 
         try {
-            $taskRepository = new TaskRepository();
-
             $deleteTaskDTO = new DeleteTaskDTO($this->userId, $taskId);
     
-            $deleteTaskService = new DeleteTaskService($taskRepository);
+            $deleteTaskService = new DeleteTaskService($this->taskRepository);
             $serviceResponse = $deleteTaskService->execute($deleteTaskDTO);
     
             echo json_encode($serviceResponse);

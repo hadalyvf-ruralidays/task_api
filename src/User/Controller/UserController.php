@@ -13,14 +13,16 @@ use Exception;
 
 class UserController
 {
+    private UserRepository $userRepository;
+
     public function __construct()
     {
+        $this->userRepository = new UserRepository();
+
     }
 
     public function register()
     {
-        $userRepository = new UserRepository();
-
         try {
             $data = (array) json_decode(file_get_contents("php://input"), true); 
 
@@ -39,7 +41,7 @@ class UserController
                 $registerParams['api_key']
             );
     
-            $registerService = new RegisterService($userRepository);
+            $registerService = new RegisterService($this->userRepository);
             $serviceResponse = $registerService->execute($registerRequest);
     
             print_r($serviceResponse);
@@ -51,7 +53,6 @@ class UserController
 
     public function login()
     {
-        $userRepository = new UserRepository();
 
         try {
             $data = (array) json_decode(file_get_contents("php://input"), true);
@@ -65,7 +66,7 @@ class UserController
                 $loginParams['password']
             );
     
-            $loginService = new LoginService($userRepository);
+            $loginService = new LoginService($this->userRepository);
             $serviceResponse = $loginService->execute($loginRequest);
             $user = $serviceResponse;
 
@@ -80,7 +81,6 @@ class UserController
 
     public function logout() 
     {
-        $userRepository = new UserRepository();
         $refreshTokenGateway = new RefreshTokenGateway();
 
         $data = (array) json_decode(file_get_contents("php://input"), true);
@@ -113,7 +113,7 @@ class UserController
 
         // Check if user from refresh token exists
         $userId = $payload["sub"];
-        $user = $userRepository->getByID($userId);
+        $user = $this->userRepository->getByID($userId);
         if ($user === false) {
             http_response_code(401);
             echo json_encode(["message" => "Invalid authentication"]);
